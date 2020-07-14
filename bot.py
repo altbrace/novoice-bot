@@ -7,12 +7,16 @@ from google.cloud import speech_v1p1beta1
 from google.cloud.speech import enums
 from google.cloud.speech_v1p1beta1 import enums
 import os
+import json
 
 
 def speechToText(raw):
-
     credentials = os.environ.get('GOOGLE_CREDENTIALS_JSON')
-    client = speech_v1p1beta1.SpeechClient.from_service_account_json(credentials)
+
+    with open('creds.json', 'w') as credentials_json:
+        json.dump(credentials, credentials_json)
+
+    client = speech_v1p1beta1.SpeechClient.from_service_account_json('creds.json')
 
     encoding = enums.RecognitionConfig.AudioEncoding.MP3
     config = {
