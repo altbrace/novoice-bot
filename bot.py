@@ -11,12 +11,8 @@ import json
 
 
 def speechToText(raw):
-    credentials = os.environ.get('GOOGLE_CREDENTIALS_JSON')
 
-    with open('creds.json', 'w') as credentials_json:
-        json.dump(credentials, credentials_json)
-
-    client = speech_v1p1beta1.SpeechClient.from_service_account_json('creds.json')
+    client = speech_v1p1beta1.SpeechClient.from_service_account_json('google-credentials.json')
 
     encoding = enums.RecognitionConfig.AudioEncoding.MP3
     config = {
