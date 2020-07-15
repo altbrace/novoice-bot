@@ -63,7 +63,7 @@ class Bot:
         self.session = requests.session()
 
     def switch_engine(self, event):
-        keyboard = VkKeyboard(one_time=True, inline=True)
+        keyboard = VkKeyboard(inline=True)
         keyboard.add_button('Google STT', color=VkKeyboardColor.DEFAULT)
         keyboard.add_line()
         keyboard.add_button('Yandex SpeechKit', color=VkKeyboardColor.DEFAULT)
