@@ -101,19 +101,21 @@ class Bot:
                 try:
                     chat_members = self.vk_api.messages.getConversationMembers(peer_id=event.object.peer_id,
                                                                                group_id=self.group_id)
+                    print(chat_members)
+                    for member in chat_members['items']:
+                        if member['member_id'] == event.object.from_id and member['is_admin']:
+                            if command in self.commands.keys():
+                                self.commands[command](event)
+                            else:
+                                self.send_msg(event.object.peer_id, event.object.id, "Команда не существует.")
+
+                        elif member['member_id'] == event.object.from_id and not member['is_admin']:
+                            self.send_msg(event.object.peer_id, event.object.id, "Ты не администратор.")
+                            
                 except vk_api.exceptions.ApiError:
                     self.send_msg(event.object.peer_id, event.object.id,
                                   "Невозможно выполнить команду без прав администратора у бота")
-                print(chat_members)
-                for member in chat_members['items']:
-                    if member['member_id'] == event.object.from_id and member['is_admin']:
-                        if command in self.commands.keys():
-                            self.commands[command](event)
-                        else:
-                            self.send_msg(event.object.peer_id, event.object.id, "Команда не существует.")
 
-                    elif member['member_id'] == event.object.from_id and not member['is_admin']:
-                        self.send_msg(event.object.peer_id, event.object.id, "Ты не администратор.")
 
 
 
