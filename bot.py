@@ -1,4 +1,5 @@
 import vk_api.vk_api
+from vk_api import exceptions
 from vk_api.bot_longpoll import VkBotLongPoll, VkBotEventType
 from vk_api.keyboard import VkKeyboard, VkKeyboardColor
 import random
@@ -96,7 +97,14 @@ class Bot:
             if event.type == VkBotEventType.MESSAGE_NEW and event.object.text[0] in self.triggers:
                 chunks = event.object.text.split()
                 command = chunks[0][1:]
-                chat_members = self.vk_api.messages.getConversationMembers()
+
+                try:
+                    chat_members = self.vk_api.messages.getConversationMembers(peer_id=event.object.peer_id,
+                                                                               group_id=self.group_id)
+                except vk_api.exceptions.ApiError:
+                    self.send_msg(event.object.peer_id, event.object.id,
+                                  "Невозможно выполнить команду без прав администратора у бота")
+
                 for member in chat_members.items:
                     if member.member_id == event.object.from_id and member.is_admin:
                         if command in self.commands.keys():
