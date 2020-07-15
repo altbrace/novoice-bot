@@ -96,10 +96,16 @@ class Bot:
             if event.type == VkBotEventType.MESSAGE_NEW and event.object.text[0] in self.triggers:
                 chunks = event.object.text.split()
                 command = chunks[0][1:]
-                if command in self.commands.keys():
-                    self.commands[command](event)
-                else:
-                    self.send_msg(event.object.peer_id, event.object.id, "Команда не существует.")
+                chat_members = self.vk_api.messages.getConversationMembers()
+                for member in chat_members.items:
+                    if member.member_id == event.object.from_id and member.is_admin:
+                        if command in self.commands.keys():
+                            self.commands[command](event)
+                        else:
+                            self.send_msg(event.object.peer_id, event.object.id, "Команда не существует.")
+
+                    elif member.member_id == event.object.from_id and not member.is_admin:
+                        self.send_msg(event.object.peer_id, event.object.id, "Ты не администратор.")
 
 
 
