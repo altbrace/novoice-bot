@@ -97,7 +97,7 @@ class Bot:
                 chunks = event.object.text.split()
                 command = chunks[0][1:]
                 if command in self.commands.keys():
-                    self.commands[command]()
+                    self.commands[command](event)
                 else:
                     self.send_msg(event.object.peer_id, event.object.id, "Команда не существует.")
 
