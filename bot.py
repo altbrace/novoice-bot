@@ -93,8 +93,8 @@ class Bot:
                             transcribed = "[неразборчиво]"
                         self.send_msg(event.object.peer_id, event.object.id, transcribed)
 
-            if event.type == VkBotEventType.MESSAGE_NEW and event['message'][0] in self.triggers:
-                chunks = event['message'].split()
+            if event.type == VkBotEventType.MESSAGE_NEW and event.object.text[0] in self.triggers:
+                chunks = event.object.text.split()
                 command = chunks[0][1:]
                 if command in self.commands.keys():
                     self.commands[command]()
