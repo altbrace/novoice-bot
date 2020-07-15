@@ -13,7 +13,6 @@ import redis
 
 
 def google_stt(raw):
-
     client = speech_v1p1beta1.SpeechClient.from_service_account_json('google-credentials.json')
 
     encoding = enums.RecognitionConfig.AudioEncoding.MP3
@@ -50,8 +49,8 @@ class Bot:
 
         self.triggers = ['!', '-', '/']
         self.commands = {
-                            "engine": self.switch_engine
-                         }
+            "engine": self.switch_engine
+        }
 
         self.vk = vk_api.VkApi(token=api_token)
         self.bot_long_poll = VkBotLongPoll(self.vk, group_id)
@@ -103,19 +102,15 @@ class Bot:
                                                                                group_id=self.group_id)
                     print(chat_members)
                     for member in chat_members['items']:
-                        if member['member_id'] == event.object.from_id and member['is_admin']:
+                        if member['member_id'] == event.object.from_id and 'is_admin' in member:
                             if command in self.commands.keys():
                                 self.commands[command](event)
                             else:
                                 self.send_msg(event.object.peer_id, event.object.id, "Команда не существует.")
 
-                        elif member['member_id'] == event.object.from_id and not member['is_admin']:
+                        elif member['member_id'] == event.object.from_id and 'is_admin' not in member:
                             self.send_msg(event.object.peer_id, event.object.id, "Ты не администратор.")
-                            
+
                 except vk_api.exceptions.ApiError:
                     self.send_msg(event.object.peer_id, event.object.id,
                                   "Невозможно выполнить команду без прав администратора у бота")
-
-
-
-
