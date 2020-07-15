@@ -63,12 +63,12 @@ class Bot:
         self.session = requests.session()
 
     def switch_engine(self, event):
-        keyboard = VkKeyboard(one_time=True)
+        keyboard = VkKeyboard(one_time=True, inline=True)
         keyboard.add_button('Google STT', color=VkKeyboardColor.DEFAULT)
         keyboard.add_line()
         keyboard.add_button('Yandex SpeechKit', color=VkKeyboardColor.DEFAULT)
 
-        self.send_msg(event.object.peer_id, event.object.id, '', keyboard.get_keyboard())
+        self.send_msg(event.object.peer_id, event.object.id, 'Выберите движок', keyboard.get_keyboard())
 
     def send_msg(self, peer_id, fwd, message, keyboard=None, *attachment):
         self.vk_api.messages.send(peer_id=peer_id,
