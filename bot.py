@@ -80,7 +80,6 @@ class Bot:
 
     def start(self):
         for event in self.bot_long_poll.listen():
-            print(event)
             attachments = event.object.attachments
             if event.type == VkBotEventType.MESSAGE_NEW and attachments:
 
@@ -100,7 +99,6 @@ class Bot:
                 try:
                     chat_members = self.vk_api.messages.getConversationMembers(peer_id=event.object.peer_id,
                                                                                group_id=self.group_id)
-                    print(chat_members)
                     for member in chat_members['items']:
                         if member['member_id'] == event.object.from_id and 'is_admin' in member:
                             if command in self.commands.keys():
