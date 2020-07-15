@@ -105,7 +105,7 @@ class Bot:
                     self.send_msg(event.object.peer_id, event.object.id,
                                   "Невозможно выполнить команду без прав администратора у бота")
                 print(chat_members)
-                for member in chat_members.items:
+                for member in chat_members['items']:
                     if member.member_id == event.object.from_id and member.is_admin:
                         if command in self.commands.keys():
                             self.commands[command](event)
