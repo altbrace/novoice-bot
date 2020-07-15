@@ -1,5 +1,6 @@
 import vk_api.vk_api
 from vk_api.bot_longpoll import VkBotLongPoll, VkBotEventType
+from vk_api.keyboard import VkKeyboard, VkKeyboardColor
 import random
 import requests
 import time
@@ -7,10 +8,10 @@ from google.cloud import speech_v1p1beta1
 from google.cloud.speech import enums
 from google.cloud.speech_v1p1beta1 import enums
 import os
-import json
+import redis
 
 
-def speechToText(raw):
+def google_stt(raw):
 
     client = speech_v1p1beta1.SpeechClient.from_service_account_json('google-credentials.json')
 
@@ -46,22 +47,40 @@ class Bot:
 
         self.group_id = group_id
 
+        self.triggers = ['!', '-', '/']
+        self.commands = {
+                            "engine": self.switch_engine
+                         }
+
         self.vk = vk_api.VkApi(token=api_token)
         self.bot_long_poll = VkBotLongPoll(self.vk, group_id)
         self.vk_api = self.vk.get_api()
         self.upload = vk_api.upload.VkUpload(self.vk)
 
+        redis_url = os.getenv('REDISTOGO_URL', 'redis://localhost:6379')
+        self.redis_ins = redis.from_url(redis_url)
+
         self.session = requests.session()
 
-    def send_msg(self, peer_id, fwd, message, *attachment):
+    def switch_engine(self, event):
+        keyboard = VkKeyboard(one_time=True)
+        keyboard.add_button('Google STT', color=VkKeyboardColor.DEFAULT)
+        keyboard.add_line()
+        keyboard.add_button('Yandex SpeechKit', color=VkKeyboardColor.DEFAULT)
+
+        self.send_msg(event.object.peer_id, event.object.id, '', keyboard.get_keyboard())
+
+    def send_msg(self, peer_id, fwd, message, keyboard=None, *attachment):
         self.vk_api.messages.send(peer_id=peer_id,
                                   message=message,
                                   random_id=get_random_id(),
                                   attachment=attachment,
+                                  keyboard=keyboard,
                                   forward_messages=fwd)
 
     def start(self):
         for event in self.bot_long_poll.listen():
+            print(event)
             attachments = event.object.attachments
             if event.type == VkBotEventType.MESSAGE_NEW and attachments:
 
@@ -69,7 +88,18 @@ class Bot:
                     if attachment['type'] == 'audio_message':
                         response = self.session.get(attachment['audio_message']['link_mp3'])
                         raw = response.content
-                        transcribed = speechToText(raw)
+                        transcribed = google_stt(raw)
                         if not transcribed:
                             transcribed = "[неразборчиво]"
                         self.send_msg(event.object.peer_id, event.object.id, transcribed)
+
+            if event.type == VkBotEventType.MESSAGE_NEW and event['message'][0] in self.triggers:
+                chunks = event['message'].split()
+                command = chunks[0][1:]
+                if command in self.commands.keys():
+                    self.commands[command]()
+                else:
+                    self.send_msg(event.object.peer_id, event.object.id, "Команда не существует.")
+
+
+
