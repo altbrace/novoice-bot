@@ -15,7 +15,10 @@ def speechToText(raw):
     client = speech_v1p1beta1.SpeechClient.from_service_account_json('google-credentials.json')
 
     encoding = enums.RecognitionConfig.AudioEncoding.MP3
+
     config = {
+        "model": "phone_call",
+        "use_enhanced": True,
         "language_code": "ru-RU",
         "sample_rate_hertz": 44100,
         "encoding": encoding,
