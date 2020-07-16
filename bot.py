@@ -70,6 +70,34 @@ class Bot:
 
         self.send_msg(event.object.peer_id, event.object.id, 'Выберите движок', keyboard.get_keyboard())
 
+    '''
+    def switch_trigger(self, event):
+        keyboard = VkKeyboard(inline=True)
+        keyboard.add_button('.', color=VkKeyboardColor.DEFAULT)
+        keyboard.add_line()
+        keyboard.add_button('/', color=VkKeyboardColor.DEFAULT)
+        keyboard.add_line()
+        keyboard.add_button('-', color=VkKeyboardColor.DEFAULT)
+        keyboard.add_line()
+        keyboard.add_button('!', color=VkKeyboardColor.DEFAULT)
+
+        self.send_msg(event.object.peer_id, event.object.id, 'Выберите триггер', keyboard.get_keyboard())
+    '''
+
+    def is_chat_admin(self, event):
+        try:
+            chat_members = self.vk_api.messages.getConversationMembers(peer_id=event.object.peer_id,
+                                                                       group_id=self.group_id)
+            for member in chat_members['items']:
+                if member['member_id'] == event.object.from_id and 'is_admin' in member:
+                    return True
+
+                elif member['member_id'] == event.object.from_id and 'is_admin' not in member:
+                    return False
+
+        except vk_api.exceptions.ApiError:
+            return "no_permission"
+
     def send_msg(self, peer_id, fwd, message, keyboard=None, *attachment):
         self.vk_api.messages.send(peer_id=peer_id,
                                   message=message,
@@ -95,20 +123,16 @@ class Bot:
             if event.type == VkBotEventType.MESSAGE_NEW and event.object.text[0] in self.triggers:
                 chunks = event.object.text.split()
                 command = chunks[0][1:]
+                is_admin = self.is_chat_admin(event)
 
-                try:
-                    chat_members = self.vk_api.messages.getConversationMembers(peer_id=event.object.peer_id,
-                                                                               group_id=self.group_id)
-                    for member in chat_members['items']:
-                        if member['member_id'] == event.object.from_id and 'is_admin' in member:
-                            if command in self.commands.keys():
-                                self.commands[command](event)
-                            else:
-                                self.send_msg(event.object.peer_id, event.object.id, "Команда не существует.")
-
-                        elif member['member_id'] == event.object.from_id and 'is_admin' not in member:
-                            self.send_msg(event.object.peer_id, event.object.id, "Ты не администратор.")
-
-                except vk_api.exceptions.ApiError:
+                if is_admin:
+                    if command in self.commands.keys():
+                        self.commands[command](event)
+                    else:
+                        self.send_msg(event.object.peer_id, event.object.id, "Команда не существует.")
+                elif not is_admin:
+                    self.send_msg(event.object.peer_id, event.object.id, "Ты не администратор.")
+                elif is_admin == "permission_error":
                     self.send_msg(event.object.peer_id, event.object.id,
-                                  "Невозможно выполнить команду без прав администратора у бота")
+                                  "Невозможно выполнить без прав администратора у бота.")
+
