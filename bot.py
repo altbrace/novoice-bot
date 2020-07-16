@@ -125,12 +125,12 @@ class Bot:
                 command = chunks[0][1:]
                 is_admin = self.is_chat_admin(event)
 
-                if is_admin:
+                if is_admin == True:
                     if command in self.commands.keys():
                         self.commands[command](event)
                     else:
                         self.send_msg(event.object.peer_id, event.object.id, "Команда не существует.")
-                elif not is_admin:
+                elif is_admin == False:
                     self.send_msg(event.object.peer_id, event.object.id, "Ты не администратор.")
                 elif is_admin == "permission_error":
                     self.send_msg(event.object.peer_id, event.object.id,
