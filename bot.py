@@ -38,7 +38,7 @@ def google_stt(raw, duration):
         file = wave.open("tmp.wav", "wb")
         file.setframerate(44100)
         file.setnchannels(1)
-        file.setsampwidth(16)
+        file.setsampwidth(2048)
         file.writeframesraw(raw)
         file.close()
 
