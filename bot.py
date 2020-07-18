@@ -5,7 +5,7 @@ from vk_api.keyboard import VkKeyboard, VkKeyboardColor
 import random
 import requests
 import time
-from google.cloud import speech_v1p1beta1
+from google.cloud import speech_v1p1beta1, storage
 from google.cloud.speech import enums
 from google.cloud.speech_v1p1beta1 import enums
 import os
@@ -22,14 +22,22 @@ def google_stt(raw, duration):
         "encoding": encoding,
         "enable_automatic_punctuation": True,
     }
-    audio = {"content": raw}
 
     print("Voice recognition initiated...")
     t0 = time.time()
 
     if duration <= 60:
+        audio = {"content": raw}
         response = client.recognize(config, audio)
     else:
+        storage_client = storage.Client()
+        bucket = storage_client.bucket("novoice-bucket-1")
+        blob = bucket.blob(f"tmp.wav")
+
+        open(f"tmp.wav", "wb").write(raw)
+        blob.upload_from_filename(f"tmp.wav")
+
+        audio = {"uri_storage": f"gs://novoice-bucket-1/tmp.wav"}
         response = client.long_running_recognize(config, audio)
 
     for result in response.results:
@@ -112,7 +120,6 @@ class Bot:
 
     def start(self):
         for event in self.bot_long_poll.listen():
-            print(event)
             attachments = event.object.attachments
             if event.type == VkBotEventType.MESSAGE_NEW and attachments:
 
@@ -126,7 +133,7 @@ class Bot:
                             transcribed = "[неразборчиво]"
                         self.send_msg(event.object.peer_id, event.object.id, transcribed)
 
-            if event.type == VkBotEventType.MESSAGE_NEW and event.object.text[0] in self.triggers:
+            if event.type == VkBotEventType.MESSAGE_NEW and event.object.text and event.object.text[0] in self.triggers:
                 chunks = event.object.text.split()
                 command = chunks[0][1:]
                 is_admin = self.is_chat_admin(event)
