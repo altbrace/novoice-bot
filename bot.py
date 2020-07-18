@@ -36,6 +36,9 @@ def google_stt(raw, duration):
         blob = bucket.blob("tmp.wav")
 
         file = wave.open("tmp.wav", "wb")
+        file.setframerate(44100)
+        file.setnchannels(1)
+        file.setsampwidth(16)
         file.writeframesraw(raw)
         file.close()
 
