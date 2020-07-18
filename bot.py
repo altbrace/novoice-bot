@@ -32,12 +32,12 @@ def google_stt(raw, duration):
     else:
         storage_client = storage.Client()
         bucket = storage_client.bucket("novoice-bucket-1")
-        blob = bucket.blob(f"tmp.wav")
+        blob = bucket.blob("tmp.wav")
 
-        open(f"tmp.wav", "wb").write(raw)
-        blob.upload_from_filename(f"tmp.wav")
+        open("tmp.wav", "wb").write(raw)
+        blob.upload_from_filename("tmp.wav")
 
-        audio = {"uri_storage": f"gs://novoice-bucket-1/tmp.wav"}
+        audio = {"uri": "gs://novoice-bucket-1/tmp.wav"}
         response = client.long_running_recognize(config, audio)
 
     for result in response.results:
