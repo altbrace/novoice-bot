@@ -9,6 +9,7 @@ from google.cloud import speech_v1p1beta1, storage
 from google.cloud.speech import enums
 from google.cloud.speech_v1p1beta1 import enums
 import os
+import wave
 import redis
 
 
@@ -34,7 +35,10 @@ def google_stt(raw, duration):
         bucket = storage_client.bucket("novoice-bucket-1")
         blob = bucket.blob("tmp.wav")
 
-        open("tmp.wav", "wb").write(raw)
+        file = wave.open("tmp.wav", "wb")
+        file.writeframesraw(raw)
+        file.close()
+
         blob.upload_from_filename("tmp.wav")
 
         audio = {"uri": "gs://novoice-bucket-1/tmp.wav"}
