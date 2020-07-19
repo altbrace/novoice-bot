@@ -33,7 +33,7 @@ def google_stt(raw, duration):
     else:
         storage_client = storage.Client()
         bucket = storage_client.bucket("novoice-bucket-1")
-        blob = bucket.blob("tmp.wav")
+        blob = bucket.blob("tmp.mp3")
 
         file = wave.open("tmp.wav", "wb")
         file.setframerate(44100)
@@ -42,9 +42,9 @@ def google_stt(raw, duration):
         file.writeframesraw(raw)
         file.close()
 
-        blob.upload_from_filename("tmp.wav")
+        blob.upload_from_filename("tmp.mp3")
 
-        audio = {"uri": "gs://novoice-bucket-1/tmp.wav"}
+        audio = {"uri": "gs://novoice-bucket-1/tmp.mp3"}
         response = client.long_running_recognize(config, audio).result()
 
     for result in response.results:
