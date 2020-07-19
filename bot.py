@@ -43,7 +43,6 @@ def google_stt(raw, duration):
         file.close()
 
         blob.upload_from_filename("tmp.mp3")
-
         audio = {"uri": "gs://novoice-bucket-1/tmp.mp3"}
         response = client.long_running_recognize(config, audio).result()
 
