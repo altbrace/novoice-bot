@@ -35,12 +35,7 @@ def google_stt(raw, duration):
         bucket = storage_client.bucket("novoice-bucket-1")
         blob = bucket.blob("tmp.mp3")
 
-        file = wave.open("tmp.wav", "wb")
-        file.setframerate(44100)
-        file.setnchannels(1)
-        file.setsampwidth(2048)
-        file.writeframesraw(raw)
-        file.close()
+        open("tmp.mp3", "wb").write(raw)
 
         blob.upload_from_filename("tmp.mp3")
         audio = {"uri": "gs://novoice-bucket-1/tmp.mp3"}
