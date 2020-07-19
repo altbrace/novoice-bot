@@ -6,8 +6,6 @@ import time
 from google.cloud import speech_v1p1beta1
 from google.cloud.speech import enums
 from google.cloud.speech_v1p1beta1 import enums
-import os
-import json
 
 
 def speechToText(raw):
